@@ -1,7 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:frontend/models/math_answer.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:frontend/assets/constants.dart';
+import 'package:frontend/services/math_service.dart';
+import 'package:frontend/ui/screens/math_answer_detail_screen.dart';
+import 'dart:convert';
+import 'dart:io';
 
 class MathSolveScreen extends StatefulWidget {
   const MathSolveScreen({super.key});
@@ -11,10 +16,11 @@ class MathSolveScreen extends StatefulWidget {
 }
 
 class _MathSolveScreenState extends State<MathSolveScreen> {
-  File? _image; 
+  File? _image;
   final _picker = ImagePicker();
+  final mathService = MathService();
 
-  pickImage(PICKING_SOURCE srcType) async {
+  _pickImage(PICKING_SOURCE srcType) async {
     XFile? pickedFile;
 
     switch (srcType) {
@@ -30,6 +36,50 @@ class _MathSolveScreenState extends State<MathSolveScreen> {
       setState(() {});
     }
   }
+
+  _onGeneratePressed() async {
+    print("Button Tapped");
+    if(_image == null) {
+      return;
+    }
+    final result = await mathService.getAnswer(_image!);
+    if (result.success && result.data != null) {
+      _navigateToAnswerDetailScreen(result.data!);
+    } else {
+      _showErrorDialog(context, result.error?.errorMessage ?? "Error");
+    }
+  }
+
+  _showErrorDialog(BuildContext context, String errorDescription) {
+      return showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content: Text(errorDescription),
+            actions: <Widget>[
+              TextButton(
+                style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge),
+                child: const Text('Ok'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+  }
+
+  _navigateToAnswerDetailScreen(List<MathAnswer> answers) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AnswerDetailScreen(answers: answers),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,7 +104,7 @@ class _MathSolveScreenState extends State<MathSolveScreen> {
             children: [
               ElevatedButton.icon(
                 onPressed: () {
-                  pickImage(PICKING_SOURCE.gallery);
+                  _pickImage(PICKING_SOURCE.gallery);
                 },
                 icon: const Icon(Icons.photo_library),
                 label: const Text(GALLERY_PICKING_OPTIONS),
@@ -62,7 +112,7 @@ class _MathSolveScreenState extends State<MathSolveScreen> {
               const SizedBox(width: 20),
               ElevatedButton.icon(
                 onPressed: () {
-                  pickImage(PICKING_SOURCE.camera);
+                  _pickImage(PICKING_SOURCE.camera);
                 },
                 icon: const Icon(Icons.camera_alt),
                 label: const Text(CAMERA_CAPTURE),
@@ -74,9 +124,7 @@ class _MathSolveScreenState extends State<MathSolveScreen> {
 
           // Button Generate
           ElevatedButton(
-            onPressed: () {
-              //generateResult(); // hàm xử lý generate
-            },
+            onPressed: _onGeneratePressed,
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(200, 50),
             ),
