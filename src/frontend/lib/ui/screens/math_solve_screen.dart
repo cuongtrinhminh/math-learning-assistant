@@ -5,8 +5,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:frontend/assets/constants.dart';
 import 'package:frontend/services/math_service.dart';
 import 'package:frontend/ui/screens/math_answer_detail_screen.dart';
-import 'dart:convert';
-import 'dart:io';
 
 class MathSolveScreen extends StatefulWidget {
   const MathSolveScreen({super.key});
@@ -19,6 +17,7 @@ class _MathSolveScreenState extends State<MathSolveScreen> {
   File? _image;
   final _picker = ImagePicker();
   final mathService = MathService();
+  bool _isLoading = false;
 
   _pickImage(PICKING_SOURCE srcType) async {
     XFile? pickedFile;
@@ -38,16 +37,31 @@ class _MathSolveScreenState extends State<MathSolveScreen> {
   }
 
   _onGeneratePressed() async {
-    print("Button Tapped");
     if(_image == null) {
       return;
     }
-    final result = await mathService.getAnswer(_image!);
-    if (result.success && result.data != null) {
-      _navigateToAnswerDetailScreen(result.data!);
-    } else {
-      _showErrorDialog(context, result.error?.errorMessage ?? "Error");
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final result = await mathService.getAnswer(_image!);
+
+      if (result.success && result.data != null) {
+        _navigateToAnswerDetailScreen(result.data!);
+      } else {
+        _showErrorDialog(context, result.error?.errorMessage ?? "Error");
+      }
     }
+    finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+         });
+      }
+    }
+
   }
 
   _showErrorDialog(BuildContext context, String errorDescription) {
@@ -94,6 +108,11 @@ class _MathSolveScreenState extends State<MathSolveScreen> {
             child: _image == null
                 ? const Text(NO_IMAGE)
                 : Image.file(_image!),
+          ),
+          Center(
+            child: _isLoading
+            ? const CircularProgressIndicator()   // spinner
+                : const SizedBox.shrink(), // trống khi không loading
           ),
 
           const SizedBox(height: 20),
