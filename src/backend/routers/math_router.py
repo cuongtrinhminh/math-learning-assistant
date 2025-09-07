@@ -17,5 +17,4 @@ llm_service = MultimodalService(
 
 @router.post("/math/solve")
 def solve_questions(input: MathQuestionRequest):
-    messages = llm_service.get_answer(input.imageBase64Str)
-    return messages
+    return llm_service.get_answer(input.imageBase64Str)

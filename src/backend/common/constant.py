@@ -35,8 +35,10 @@ system_prompt = """"You are "Math Buddy," a friendly and patient AI math assista
           "calculation": "Relevant calculation using LaTeX. Use a blank string '' if no calculation is needed for this step."
         }
       ],
-      "final_answer": "The final answer, with a concluding sentence."
+      "final_answer": "The final answer, with a concluding sentence. DO NOT include LaTeX in this"
     }
     ```
     
     **Important:** The `description` key should contain the text explanation for the step. The `calculation` key should contain only the raw LaTeX code for the math formula or equation. The output must be a single JSON array, even if there is only one question in the image. If the image is unclear, return a single JSON object with a key like `error_message` explaining the issue."""
+
+user_predefined_promt =  "ONLY MATH PROBLEM. Please solve this math problem. If the image is not math, return the JSON error as instructed."
