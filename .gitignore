@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+
+# Env
+*.env
+
+# Flutter
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+build/
+.flutter/
+*.lock
+.metadata
+.gradle/
+android/.gradle/
+android/local.properties
+ios/Pods/
+flutter/generated/
+
+# IDE
+.vscode/
+.idea/
