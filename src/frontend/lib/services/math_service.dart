@@ -6,7 +6,7 @@ import 'package:frontend/models/math_error.dart';
 import 'package:frontend/models/api_response.dart';
 
 class MathService {
-  final String apiUrl = "";
+  final String apiUrl = "http://10.0.2.2:8000/math/solve";
 
   Future<ApiResponse<List<MathAnswer>>> getAnswer(File image) async {
     try {
@@ -17,7 +17,7 @@ class MathService {
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"imageBase64": base64Image}),
+        body: jsonEncode({"imageBase64Str": base64Image}),
       );
 
       if (response.statusCode == 200) {
@@ -26,6 +26,7 @@ class MathService {
         return ApiResponse.success(answers);
       } else {
         final json = jsonDecode(response.body);
+        print(json);
         return ApiResponse.error(
           MathError.fromJson(json),
           code: response.statusCode,
